@@ -1,0 +1,10 @@
+# Ignore paths
+data/raw
+
+# Ignore file types
+*.log
+*.env
+*.pkl
+*.csv
+*.xlsx
+*.xls
