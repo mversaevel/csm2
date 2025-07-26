@@ -1,5 +1,6 @@
 # Ignore paths
 data/raw
+data/index_data
 
 # Ignore file types
 *.log
