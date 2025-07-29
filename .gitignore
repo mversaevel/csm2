@@ -9,3 +9,5 @@ data/index_data
 *.csv
 *.xlsx
 *.xls
+*.html
+*.png
