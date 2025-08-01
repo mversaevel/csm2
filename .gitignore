@@ -1,13 +1,10 @@
 # Ignore paths
-data/raw
+data/other
 data/index_data
 
 # Ignore file types
 *.log
 *.env
-*.pkl
-*.csv
-*.xlsx
-*.xls
 *.html
+*.pdf
 *.png
