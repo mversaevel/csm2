@@ -1,6 +1,14 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
 # Ignore paths
 data/other
 data/index_data
+
+# Ignore environments
+venv/
+env/
 
 # Ignore file types
 *.log
