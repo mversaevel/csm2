@@ -65,3 +65,36 @@ def create_efficient_frontier(
         'returns': frontier_returns,
         'volatility': frontier_vols
     })
+
+
+def calc_excess_returns(
+    df_returns: pd.DataFrame,
+    df_market_data: pd.DataFrame,
+    risk_free_col: str = 'DTB4WK',
+    log_returns: bool = False
+) -> pd.DataFrame:
+    """ 
+    Calculate excess returns by subtracting risk free rate from asset returns.
+    
+    Notes:
+    * Assumes "Date" as index in both dataframes.
+    * Allows for log returns calculation if specified; be sure to provide risk_free_col in log 
+      format if log_returns=True.
+    """
+
+    df_market_data = df_market_data[[risk_free_col]].copy()
+    df_market_data.index = pd.to_datetime(df_market_data.index)
+    df_returns.index = pd.to_datetime(df_returns.index)
+
+    # Align market_data to the date range of returns
+    start_date = df_returns.index.min()
+    end_date = df_returns.index.max()
+    
+    # Ensure index is DatetimeIndex and selection is inclusive of end_date
+    df_market_data = df_market_data.loc[start_date:end_date]
+    if log_returns:
+        df_returns = np.log(1 + df_returns)
+
+    returns_excess = df_returns.apply(lambda x: x - df_market_data[risk_free_col], axis=0)
+
+    return returns_excess

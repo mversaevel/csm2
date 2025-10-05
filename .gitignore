@@ -5,6 +5,7 @@ __pycache__/
 # Ignore paths
 data/other
 data/index_data
+rmarkdown
 
 # Ignore environments
 venv/

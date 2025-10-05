@@ -6,7 +6,7 @@ from statsmodels.tsa.api import VAR
 
 n_obs = 100
 
-# Let copilot simulate some dummy data
+# Let copilot simulate some dummy data for testing
 np.random.seed(42)
 sr = np.random.normal(loc=0.07/12, scale=0.15/np.sqrt(12), size=n_obs)
 dy = np.random.normal(loc=0.02, scale=0.005, size=n_obs)
@@ -40,7 +40,6 @@ def get_var_decomp(
     cash_flow_news = []
     discount_rate_news = []
     for i in range(len(results.resid)):
-        # Ugly code but I am lacking familiarity with numpy arrays
         u = results.resid.iloc[i, :].values.reshape(-1, 1)
 
         cf_news = float(((e1.T + e1.T @ L) @ u)[0, 0])
