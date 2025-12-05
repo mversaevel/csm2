@@ -6,7 +6,7 @@ from statsmodels.tsa.api import VAR
 
 n_obs = 100
 
-# Let copilot simulate some dummy data for testing
+# Let copilot simulate some dummy data for testing and debugging:
 np.random.seed(42)
 sr = np.random.normal(loc=0.07/12, scale=0.15/np.sqrt(12), size=n_obs)
 dy = np.random.normal(loc=0.02, scale=0.005, size=n_obs)

@@ -6,7 +6,8 @@ import scipy.optimize as sco
 def create_efficient_frontier(
         mean_returns: np.ndarray, 
         cov_matrix: pd.DataFrame, 
-        target_ret_normalizer: int = 1000
+        target_ret_normalizer: int = 1000,
+        n_points: int = 150,
 ) -> pd.DataFrame:
     """ Create input for plotting an efficient frontier 
     
@@ -39,7 +40,7 @@ def create_efficient_frontier(
     frontier_returns = []
     frontier_vols = []
 
-    for loop_return in range(150):
+    for loop_return in range(n_points):
         target_return = loop_return / target_ret_normalizer
         constraints = (
             {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},

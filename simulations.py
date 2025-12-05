@@ -117,14 +117,19 @@ def run_all_simulations(
     return results
 
 
-def plot_std_dev(
+def plot_sim_results(
         results_quantiles: pd.DataFrame, 
         metric: str,
         n_runs: int,
         list_of_quantiles: list | None = None,
         facet_plot: bool = False,
+        use_convergence_type: bool = False,
 ) -> None:
-    """ Plot metric of choice by number of countries for different datasets. """
+    """ Plot metric of choice by number of countries for different datasets. 
+
+    Use convergence_type=True to plot based on convergence to the limit; only affects labels, 
+    data should be provided by the user accordingly, i.e. calculated separately.    
+    """
 
     if metric not in results_quantiles.columns:
         raise ValueError(f"Metric '{metric}' not found in combined DataFrame columns.")
@@ -166,9 +171,18 @@ def plot_std_dev(
                     label=f"{dataset} - {quantile:.3f}"
                 )
             ax.set_xlabel('Number of Countries')
+            
             ax.set_title(f'Metric: {metric}; Index type: {dataset}; Random runs per level: {n_runs}')
             ax.legend(title='Percentile')
-        axes[0].set_ylabel(f'Metric: {metric}')
+        
+        # if use_convergence_type:
+        #     axes[0].set_ylabel(f'Convergence (% of limit of {metric})')
+        # else:
+        #     axes[0].set_ylabel(f'Metric: {metric}')
+
+        ylabel = f'Convergence (% of limit of {metric})' if use_convergence_type else f'Metric: {metric}'
+        axes[0].set_ylabel(ylabel)
+        
         plt.tight_layout()
         plt.show()
     else:
@@ -186,11 +200,58 @@ def plot_std_dev(
                     label=f"{dataset} - {quantile:.3f}"
                 )
         ax.set_xlabel('Number of Countries')
-        ax.set_ylabel(f'Metric: {metric}')
+        # if use_convergence_type:
+        #     ax.set_ylabel(f'Convergence (% of limit of {metric})')
+        # else:
+        #     ax.set_ylabel(f'Metric: {metric}')
+
+        ylabel = f'Convergence (% of limit of {metric})' if use_convergence_type else f'Metric: {metric}'
+        ax.set_ylabel(ylabel)
+
         ax.set_title(f'Metric: {metric} by Number of Countries and index type; Random runs per level: {n_runs}')
         ax.legend(title='Dataset - Percentile')
         plt.tight_layout()
         plt.show()
+
+
+def get_convergence_normalized_results(
+        results_quantiles: pd.DataFrame,
+        n_countries: int = 16
+) -> pd.DataFrame:
+    """ Normalize results based on convergence values at maximum number of countries.
+    
+    Args:
+        results_quantiles (DataFrame): DataFrame containing quantile results from simulations. 
+            Effectively this is the output from the main script, can be obtained from reading the
+            .csv file saved there.
+        n_countries (int): Number of countries to consider as the convergence point; main script
+            uses 16, but explicit > implicit.
+
+    """
+    
+
+    convergence_values_trad = {
+        "return_ann": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "trad")]["return_ann"].to_list()[0],
+        "std_dev": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "trad")]["std_dev"].to_list()[0],
+        "sharpe_ratio": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "trad")]["sharpe_ratio"].to_list()[0],
+    }
+
+    convergence_values_csm = {
+        "return_ann": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "csm")]["return_ann"].to_list()[0],
+        "std_dev": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "csm")]["std_dev"].to_list()[0],
+        "sharpe_ratio": results_quantiles[(results_quantiles["num_countries"] == n_countries) & (results_quantiles["dataset"] == "csm")]["sharpe_ratio"].to_list()[0],
+    }
+
+    results_quantiles_normalized_convergence = results_quantiles.copy()
+
+    for metric in ["return_ann", "std_dev", "sharpe_ratio"]:
+        trad_convergence_value = convergence_values_trad[metric]
+        csm_convergence_value = convergence_values_csm[metric]
+        results_quantiles_normalized_convergence.loc[results_quantiles_normalized_convergence["dataset"] == "trad", metric] /= trad_convergence_value
+        results_quantiles_normalized_convergence.loc[results_quantiles_normalized_convergence["dataset"] == "csm", metric] /= csm_convergence_value
+
+    return results_quantiles_normalized_convergence
+
 
 
 if __name__ == "__main__":
@@ -230,4 +291,4 @@ if __name__ == "__main__":
 
     results_quantiles.to_csv(f'data/simulations_results_quantiles_n_runs_{N_RUNS}.csv')
 
-    plot_std_dev(results_quantiles, metric="std_dev", n_runs=N_RUNS, list_of_quantiles=QUANTILES, facet_plot=True)
+    plot_sim_results(results_quantiles, metric="std_dev", n_runs=N_RUNS, list_of_quantiles=QUANTILES, facet_plot=True)
