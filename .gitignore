@@ -6,6 +6,7 @@ __pycache__/
 data/other
 data/index_data
 rmarkdown
+rmarkdown2_tmp
 
 # Ignore environments
 venv/

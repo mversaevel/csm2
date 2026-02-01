@@ -21,7 +21,7 @@ dummy_data = pd.DataFrame({
 
 def get_var_decomp(
         data: pd.DataFrame,        
-) -> tuple:
+) -> tuple[list, list, VAR]:
     """ Returns the VAR model results and the cash flow and discount rate news. """
     k_factors = data.shape[1]  # Number of factors (columns) in the data
     model = VAR(data)

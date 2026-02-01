@@ -124,6 +124,7 @@ def plot_sim_results(
         list_of_quantiles: list | None = None,
         facet_plot: bool = False,
         use_convergence_type: bool = False,
+        show_plot: bool = True,
 ) -> None:
     """ Plot metric of choice by number of countries for different datasets. 
 
@@ -182,9 +183,7 @@ def plot_sim_results(
 
         ylabel = f'Convergence (% of limit of {metric})' if use_convergence_type else f'Metric: {metric}'
         axes[0].set_ylabel(ylabel)
-        
-        plt.tight_layout()
-        plt.show()
+
     else:
         fig, ax = plt.subplots(figsize=(8, 5))
         for dataset in results_quantiles['dataset'].unique():
@@ -210,8 +209,12 @@ def plot_sim_results(
 
         ax.set_title(f'Metric: {metric} by Number of Countries and index type; Random runs per level: {n_runs}')
         ax.legend(title='Dataset - Percentile')
+
+    if show_plot:
         plt.tight_layout()
         plt.show()
+    
+    return fig
 
 
 def get_convergence_normalized_results(

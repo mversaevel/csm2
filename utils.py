@@ -2,6 +2,8 @@
 import numpy as np
 import pandas as pd
 import scipy.optimize as sco
+from scipy.stats import f
+
 
 def create_efficient_frontier(
         mean_returns: np.ndarray, 
@@ -99,3 +101,101 @@ def calc_excess_returns(
     returns_excess = df_returns.apply(lambda x: x - df_market_data[risk_free_col], axis=0)
 
     return returns_excess
+
+
+"""
+Perform the Gibbons, Ross and Shanken (1989) Test
+    - Gibbons, M., Ross, S., and Shanken, J., 1989, A Test of the Efficiency of A Given Portfolio,
+      Econometrica 57, 1121-1152.
+"""
+
+def grs_test(resid: np.ndarray, alpha: np.ndarray, factors: np.ndarray) -> tuple:
+    """ Perform the Gibbons, Ross and Shaken (1989) test.
+        :param resid: Matrix of residuals from the OLS of size TxK.
+        :param alpha: Vector of alphas from the OLS of size Kx1.
+        :param factors: Matrix of factor returns of size TxJ.
+        :return Test statistic and pValue of the test statistic.
+    
+    Note: slightly adjusted based on Cochrane (2005) notation.
+    """
+    # Determine the time series and assets
+    iT, iN = resid.shape
+
+    # Determine the amount of risk factors
+    iK = factors.shape[1]
+
+    # Input size checks
+    assert alpha.shape == (iN, 1)
+    assert factors.shape == (iT, iK)
+
+    # Covariance of the residuals, variables are in columns.
+    resid_cov = np.cov(resid, rowvar=False)
+
+    # Mean of excess returns of the risk factors
+    mu_f = np.nanmean(factors, axis=0)
+
+    try:
+        assert mu_f.shape == (1, iK)
+    except AssertionError:
+        mu_f = mu_f.reshape(1, iK)
+
+    # Duplicate this series for T timestamps
+    mu_f_extended = np.repeat(mu_f, iT, axis=0)
+
+    # Test statistic
+    mCovRF = (factors - mu_f_extended).T @ (factors - mu_f_extended) / (iT - 1)
+    f_GRS = (iT / iN) * ((iT - iN - iK) / (iT - iK - 1)) * \
+            (alpha.T @ (np.linalg.inv(resid_cov) @ alpha)) / \
+            (1 + (mu_f @ (np.linalg.inv(mCovRF) @ mu_f.T)))
+
+    pVal = 1 - f.cdf(f_GRS, iN, iT-iN-iK)
+    return f_GRS[0][0], pVal[0][0]
+
+
+def load_OECD_data(
+        path_and_filename: str,
+        path_and_filename_of_country_dict: str = './data/country_dict_ISO_3_to_2.csv',
+#        iso_to_country: pd.DataFrame
+) -> pd.DataFrame:
+    """ Load and process OECD data from local excel files. """
+
+    df = pd.read_csv(path_and_filename)
+    iso_to_country = pd.read_csv(path_and_filename_of_country_dict)
+    iso_to_country.columns = ['ISO_3', 'ISO_2']
+
+    country_dict_ISO_3_to_2 = dict(zip(
+        iso_to_country['ISO_3'], iso_to_country['ISO_2']
+    ))
+
+    df = pd.read_csv(path_and_filename)
+
+    df = df[
+        (df['FREQ'] == "M") & 
+        (df['MEASURE'] == 'LI') & 
+        (df['ADJUSTMENT'] == 'AA')
+    ].sort_values(by=[
+        'REF_AREA', 
+        'TIME_PERIOD'
+    ], ascending=True)
+
+    cols_to_select = [
+        'REF_AREA',
+        'TIME_PERIOD',
+        'OBS_VALUE',
+    ]
+
+    df = df[cols_to_select]
+
+    df['REF_AREA'] = df['REF_AREA'].map(country_dict_ISO_3_to_2)
+    df = df.dropna(subset=['REF_AREA']) # 13 of original 16 countries remaining
+
+    df = df.rename(columns={
+        'REF_AREA': 'Country',
+        'TIME_PERIOD': 'Date',
+        'OBS_VALUE': 'CLI',
+    }) 
+    df['Date'] = pd.to_datetime(df['Date']) + pd.offsets.MonthEnd(0)
+
+    return df
+
+    
