@@ -5,6 +5,7 @@ __pycache__/
 # Ignore paths
 data/other
 data/index_data
+output/
 rmarkdown
 rmarkdown2_tmp
 
@@ -18,3 +19,4 @@ env/
 *.html
 *.pdf
 *.png
+*.pkl

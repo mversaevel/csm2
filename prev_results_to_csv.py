@@ -6,19 +6,20 @@ import pandas as pd
 import pickle
 
 # load CSM index data
-data_path = 'data/index_data/'
-file_name = 'run4-mimicking' # w/o extension
+data_path = 'data/index_data/' # index data is not tracked in the repo; add there results manually to this folder
+# file_name = 'run4-mimicking' # w/o extension
+file_name = 'data_summary'
 
-output_path = f'rmarkdown/{file_name}/'
+output_path = f'output/{file_name}/'
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
 with open(data_path + file_name + '.pkl', 'rb') as f:
     results = pickle.load(f)
 
-results['correlations_grouped_by_cluster'] = pd.DataFrame(results['correlations_grouped_by_cluster'])
-results['correlations_grouped_by_region'] = pd.DataFrame(results['correlations_grouped_by_region'])
-results['correlations_no_grouping'] = pd.DataFrame(results['correlations_no_grouping'])
+# results['correlations_grouped_by_cluster'] = pd.DataFrame(results['correlations_grouped_by_cluster'])
+# results['correlations_grouped_by_region'] = pd.DataFrame(results['correlations_grouped_by_region'])
+# results['correlations_no_grouping'] = pd.DataFrame(results['correlations_no_grouping'])
 
 ### convert output to csv's for easier use in R markdown
 

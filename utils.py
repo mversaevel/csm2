@@ -74,7 +74,7 @@ def calc_excess_returns(
     df_returns: pd.DataFrame,
     df_market_data: pd.DataFrame,
     risk_free_col: str = 'DTB4WK',
-    log_returns: bool = False
+    log_returns: bool = False,
 ) -> pd.DataFrame:
     """ 
     Calculate excess returns by subtracting risk free rate from asset returns.
@@ -84,7 +84,6 @@ def calc_excess_returns(
     * Allows for log returns calculation if specified; be sure to provide risk_free_col in log 
       format if log_returns=True.
     """
-
     df_market_data = df_market_data[[risk_free_col]].copy()
     df_market_data.index = pd.to_datetime(df_market_data.index)
     df_returns.index = pd.to_datetime(df_returns.index)
