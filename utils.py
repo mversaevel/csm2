@@ -300,6 +300,7 @@ def generate_event_study_results(
 def graph_events(
     results_dictionary: dict,
     graph_type: Literal['agg_rel_ret', 'agg_abs_ret_1plot', 'unagg_rel_ret_by_country', 'unagg_abs_ret_by_country'],
+    output_file_name: str,
     save_fig: bool = True,
     output_path: str = 'output/run4_1-mimicking_addl'
 ) -> any:
@@ -334,14 +335,14 @@ def graph_events(
 
     if graph_type == 'agg_abs_ret_1plot':
         combined_country_events_abs = pd.concat([
-            pd.concat(results_dictionary['event_returns_absolute_trad'], axis=1).mean(axis=1),
             pd.concat(results_dictionary['event_returns_absolute_csm'], axis=1).mean(axis=1),
-        ], axis=1, keys=['Trad country index', 'CSM index'])
+            pd.concat(results_dictionary['event_returns_absolute_trad'], axis=1).mean(axis=1),
+        ], axis=1, keys=['CSM index', 'Trad country index'])
 
         fig, ax = plt.subplots(figsize=(8,8))
 
-        ax.plot(combined_country_events_abs.index, combined_country_events_abs['Trad country index'], label=combined_country_events_abs.columns[0])
-        ax.plot(combined_country_events_abs.index, combined_country_events_abs['CSM index'], label=combined_country_events_abs.columns[1])
+        ax.plot(combined_country_events_abs.index, combined_country_events_abs['CSM index'], label=combined_country_events_abs.columns[0])
+        ax.plot(combined_country_events_abs.index, combined_country_events_abs['Trad country index'], label=combined_country_events_abs.columns[1])
         ax.set_title(f'Event study results for measure {results_settings['event_data_name']}, n_events={results_settings['n_events']}')
         ax.set_ylabel('Cumulative returns (absolute)')
         ax.legend()
@@ -397,8 +398,8 @@ def graph_events(
         raise NotImplementedError('graph type "unagg_abs_ret_by_country" is not yet implemented')
 
     if save_fig:
-        file_name = f'fig_event_study_aggregate_{results_settings['event_data_name']}.png'
-        fig.savefig(f'{output_path}/{file_name}', bbox_inches='tight')
+        # file_name = f'fig_event_study_aggregate_{results_settings['event_data_name']}.png'
+        fig.savefig(f'{output_path}/{output_file_name}.png', bbox_inches='tight')
 
     return plt
 
